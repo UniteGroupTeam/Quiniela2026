@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Quiniela Mundial 2026</title>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="stylesheet" href="./styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Background Blur Elements -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <div id="install-btn" class="install-pwa hide">
+    <i class="fa-solid fa-download"></i> Instalar App
+  </div>
+
+  <!-- App Container -->
+  <main class="app-container">
+    
+    <!-- Auth View -->
+    <section id="auth-view" class="view active-view glass-panel">
+      <div class="auth-header">
+        <i class="fa-solid fa-trophy auth-icon"></i>
+        <h1>Quiniela 2026</h1>
+        <p>Inicia sesión o regístrate para jugar.</p>
+      </div>
+      <form id="auth-form" class="auth-form">
+        <div class="input-group">
+          <i class="fa-solid fa-user"></i>
+          <input type="text" id="username" placeholder="Usuario" required autocomplete="off">
+        </div>
+        <div class="input-group">
+          <i class="fa-solid fa-lock"></i>
+          <input type="password" id="password" placeholder="Contraseña" required>
+        </div>
+        <div class="auth-actions">
+          <button type="submit" id="btn-login" class="btn primary-btn">Entrar</button>
+          <button type="button" id="btn-register" class="btn secondary-btn">Registrarse</button>
+        </div>
+        <div id="auth-msg" class="message"></div>
+      </form>
+    </section>
+
+    <!-- Main Content View -->
+    <section id="main-view" class="view">
+      <header class="app-header glass-panel">
+        <div class="header-content">
+          <h2>Mundial 2026</h2>
+          <div class="user-info">
+            <i class="fa-solid fa-circle-user"></i>
+            <span id="display-user">Usuario</span>
+            <span class="pts-badge" id="display-pts">0 pts</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="tab-content" id="tab-quiniela">
+        <div class="section-title">
+          <h3>Mis Pronósticos</h3>
+          <p>Ingresa tus resultados antes del pitazo inicial.</p>
+        </div>
+        <div id="quiniela-list" class="cards-container">
+          <!-- Renderizado en JS -->
+          <div class="loader"><i class="fa-solid fa-spinner fa-spin"></i> Cargando partidos...</div>
+        </div>
+      </div>
+
+      <div class="tab-content hide" id="tab-podio">
+        <div class="section-title">
+          <h3>Clasificación General</h3>
+          <p>Ranking en tiempo real.</p>
+        </div>
+        <div id="podio-list" class="glass-panel ranking-list">
+          <!-- Renderizado en JS -->
+        </div>
+      </div>
+
+      <div class="tab-content hide" id="tab-resultados">
+        <div class="section-title">
+          <h3>Resultados Reales</h3>
+          <p>Marcadores oficiales del Mundial.</p>
+        </div>
+        <div id="resultados-list" class="cards-container">
+          <!-- Renderizado en JS -->
+        </div>
+      </div>
+
+      <div class="tab-content hide" id="tab-reglas">
+        <div class="section-title">
+          <h3>Reglas del Juego</h3>
+        </div>
+        <div class="glass-panel rules-panel">
+          <ul>
+            <li><i class="fa-solid fa-check text-green"></i> <b>Acierto Exacto (2 Puntos):</b> Adivinar el marcador exacto del partido.</li>
+            <li><i class="fa-solid fa-check text-yellow"></i> <b>Acierto Resultado (1 Punto):</b> Acertar qué equipo gana o si hay empate, sin atinarle al marcador.</li>
+            <li><i class="fa-solid fa-xmark text-red"></i> <b>Fallo (0 Puntos):</b> No acertar el ganador ni el empate.</li>
+            <li><i class="fa-solid fa-clock"></i> <b>Cierre:</b> Solo puedes enviar o modificar tu pronóstico antes de que el partido comience.</li>
+            <li><i class="fa-solid fa-robot"></i> <b>Automático:</b> Los resultados y puntos se actualizan solos cada 2 horas aprox.</li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Spacing for bottom navbar -->
+      <div class="bottom-spacer"></div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation Bar (Liquid Glass) -->
+  <nav id="bottom-nav" class="bottom-nav glass-nav hide">
+    <button class="nav-item active" data-target="tab-quiniela">
+      <i class="fa-solid fa-pen-to-square"></i>
+      <span>Quiniela</span>
+    </button>
+    <button class="nav-item" data-target="tab-podio">
+      <i class="fa-solid fa-medal"></i>
+      <span>Podio</span>
+    </button>
+    <button class="nav-item" data-target="tab-resultados">
+      <i class="fa-solid fa-futbol"></i>
+      <span>Resultados</span>
+    </button>
+    <button class="nav-item" data-target="tab-reglas">
+      <i class="fa-solid fa-book"></i>
+      <span>Reglas</span>
+    </button>
+  </nav>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">Mensaje</div>
+
+  <!-- Scripts -->
+  <script src="./app.js"></script>
+</body>
+</html>
