@@ -1,6 +1,6 @@
 // --- CONFIGURACIÓN ---
 // Reemplaza esta URL con la que te da Google Apps Script al hacer "Nueva Implementación"
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyPAtQ8YMcKwpB-mjb-qXIDdduk1Z3kBQoZTXY68auHRLYRcACDtm_X-jx0txC_vbETCw/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwx6tFz-U96YO6HVlVh5rTAH23IffaX_uPp5_5UJHsevCgHTXfmVSr5za7JXWGBekf_ZA/exec';
 
 // --- ESTADO GLOBAL ---
 let currentUser = null;
@@ -96,11 +96,8 @@ async function handleAuth(e, action) {
   const passwordHash = await hashPassword(passwordInput);
   
   try {
-    const res = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action, username: usernameInput, passwordHash }),
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' } // GAS requiere text/plain
-    });
+    const queryParams = new URLSearchParams({ action, username: usernameInput, passwordHash }).toString();
+    const res = await fetch(`${SCRIPT_URL}?${queryParams}`);
     
     const data = await res.json();
     
@@ -226,16 +223,14 @@ window.savePrediction = async function(partidoId) {
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
   
   try {
-    const res = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        action: 'predict',
-        username: currentUser,
-        partidoId: partidoId,
-        golesLocal: hInput,
-        golesVisitante: aInput
-      })
-    });
+    const queryParams = new URLSearchParams({
+      action: 'predict',
+      username: currentUser,
+      partidoId: partidoId,
+      golesLocal: hInput,
+      golesVisitante: aInput
+    }).toString();
+    const res = await fetch(`${SCRIPT_URL}?${queryParams}`);
     const data = await res.json();
     
     if (data.success) {
