@@ -2,15 +2,15 @@
   "name": "Quiniela Mundial 2026",
   "short_name": "Quiniela",
   "description": "Quiniela interactiva para el Mundial 2026",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#0a0a0a",
+  "background_color": "#ffffff",
+  "theme_color": "#1a73e8",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/8154/8154674.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "./icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ]

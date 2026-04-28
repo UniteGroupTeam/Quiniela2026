@@ -5,34 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Quiniela Mundial 2026</title>
   <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#0a0a0a">
+  <meta name="theme-color" content="#1a73e8">
   <link rel="stylesheet" href="./styles.css">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-  <!-- Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body data-theme="light">
 
-  <!-- Background Blur Elements -->
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="blob blob-3"></div>
+  <button class="theme-toggle" id="theme-btn">
+    <i class="fa-solid fa-moon"></i>
+  </button>
 
-  <div id="install-btn" class="install-pwa hide">
+  <button id="install-btn" class="install-pwa hide">
     <i class="fa-solid fa-download"></i> Instalar App
-  </div>
+  </button>
 
   <!-- App Container -->
   <main class="app-container">
     
     <!-- Auth View -->
-    <section id="auth-view" class="view active-view glass-panel">
+    <section id="auth-view" class="view active-view">
       <div class="auth-header">
-        <i class="fa-solid fa-trophy auth-icon"></i>
+        <img src="https://imgur.com/NQI7n3j.png" alt="Mascota Notaria" style="width: 100%; max-width: 450px; border-radius: var(--radius-md); margin-bottom: 25px; box-shadow: var(--shadow);">
         <h1>Quiniela 2026</h1>
         <p>Inicia sesión o regístrate para jugar.</p>
       </div>
-      <form id="auth-form" class="auth-form">
+      <form id="auth-form" class="m-card" style="margin-top: 30px;">
         <div class="input-group">
           <i class="fa-solid fa-user"></i>
           <input type="text" id="username" placeholder="Usuario" required autocomplete="off">
@@ -41,81 +39,87 @@
           <i class="fa-solid fa-lock"></i>
           <input type="password" id="password" placeholder="Contraseña" required>
         </div>
-        <div class="auth-actions">
+        <p style="font-size: 0.8rem; color: var(--danger); text-align: left; margin-bottom: 20px; font-weight: 500;">
+          <i class="fa-solid fa-triangle-exclamation"></i> Importante: Anota tu contraseña en un lugar seguro. No se puede recuperar si la olvidas.
+        </p>
+        <div style="margin-top: 15px;">
           <button type="submit" id="btn-login" class="btn primary-btn">Entrar</button>
-          <button type="button" id="btn-register" class="btn secondary-btn">Registrarse</button>
+          <button type="button" id="btn-register" class="btn secondary-btn">Crear cuenta</button>
         </div>
         <div id="auth-msg" class="message"></div>
       </form>
     </section>
 
+    <!-- Modal QR PC -->
+    <div id="qr-modal" class="modal hide">
+      <div class="modal-content m-card" style="text-align: center; position: relative;">
+        <button id="close-qr" style="position:absolute; top:15px; right:15px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-muted);"><i class="fa-solid fa-xmark"></i></button>
+        <h3 style="margin-bottom:10px; color:var(--primary);">Juega desde tu celular</h3>
+        <p style="font-size: 0.95rem; margin-bottom: 20px; color:var(--text-muted);">Escanea este código QR con la cámara de tu teléfono para instalar la app fácilmente.</p>
+        <img src="https://imgur.com/eNRDXNG.png" alt="QR Code" style="width: 100%; max-width: 220px; border-radius: var(--radius-md); border: 2px solid var(--border);">
+      </div>
+    </div>
+
     <!-- Main Content View -->
     <section id="main-view" class="view">
-      <header class="app-header glass-panel">
-        <div class="header-content">
-          <h2>Mundial 2026</h2>
-          <div class="user-info">
-            <i class="fa-solid fa-circle-user"></i>
-            <span id="display-user">Usuario</span>
-            <span class="pts-badge" id="display-pts">0 pts</span>
-          </div>
+      <header class="app-header">
+        <h2>Mundial 2026</h2>
+        <div class="user-info">
+          <span id="display-user">Usuario</span>
+          <span class="pts-badge" id="display-pts">0 pts</span>
+          <button id="btn-logout" style="background:none;border:none;color:var(--on-primary);cursor:pointer;margin-left:5px;font-size:1.1rem;"><i class="fa-solid fa-right-from-bracket"></i></button>
         </div>
       </header>
 
       <div class="tab-content" id="tab-quiniela">
         <div class="section-title">
           <h3>Mis Pronósticos</h3>
-          <p>Ingresa tus resultados antes del pitazo inicial.</p>
+          <p>Ingresa tus resultados antes de la fecha del partido.</p>
         </div>
         <div id="quiniela-list" class="cards-container">
-          <!-- Renderizado en JS -->
-          <div class="loader"><i class="fa-solid fa-spinner fa-spin"></i> Cargando partidos...</div>
+          <div style="text-align:center; padding: 40px; color: var(--text-muted);">
+            <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
+          </div>
         </div>
       </div>
 
       <div class="tab-content hide" id="tab-podio">
         <div class="section-title">
           <h3>Clasificación General</h3>
-          <p>Ranking en tiempo real.</p>
         </div>
-        <div id="podio-list" class="glass-panel ranking-list">
-          <!-- Renderizado en JS -->
+        <div class="m-card" style="padding: 0;">
+          <div id="podio-list" class="ranking-list"></div>
         </div>
       </div>
 
       <div class="tab-content hide" id="tab-resultados">
         <div class="section-title">
           <h3>Resultados Reales</h3>
-          <p>Marcadores oficiales del Mundial.</p>
+          <p>Marcadores y tus puntos obtenidos.</p>
         </div>
-        <div id="resultados-list" class="cards-container">
-          <!-- Renderizado en JS -->
-        </div>
+        <div id="resultados-list" class="cards-container"></div>
       </div>
 
       <div class="tab-content hide" id="tab-reglas">
         <div class="section-title">
           <h3>Reglas del Juego</h3>
         </div>
-        <div class="glass-panel rules-panel">
-          <ul>
-            <li><i class="fa-solid fa-check text-green"></i> <b>Acierto Exacto (2 Puntos):</b> Adivinar el marcador exacto del partido.</li>
-            <li><i class="fa-solid fa-check text-yellow"></i> <b>Acierto Resultado (1 Punto):</b> Acertar qué equipo gana o si hay empate, sin atinarle al marcador.</li>
-            <li><i class="fa-solid fa-xmark text-red"></i> <b>Fallo (0 Puntos):</b> No acertar el ganador ni el empate.</li>
-            <li><i class="fa-solid fa-clock"></i> <b>Cierre:</b> Solo puedes enviar o modificar tu pronóstico antes de que el partido comience.</li>
-            <li><i class="fa-solid fa-robot"></i> <b>Automático:</b> Los resultados y puntos se actualizan solos cada 2 horas aprox.</li>
+        <div class="m-card">
+          <ul style="list-style: none;">
+            <li style="margin-bottom: 15px;"><i class="fa-solid fa-check text-green" style="width: 25px;"></i> <b>Acierto Exacto (2 Puntos):</b> Adivinar el marcador exacto del partido.</li>
+            <li style="margin-bottom: 15px;"><i class="fa-solid fa-check text-yellow" style="width: 25px;"></i> <b>Acierto Resultado (1 Punto):</b> Acertar qué equipo gana o si hay empate, sin atinarle al marcador.</li>
+            <li style="margin-bottom: 15px;"><i class="fa-solid fa-xmark text-red" style="width: 25px;"></i> <b>Fallo (0 Puntos):</b> No acertar el ganador ni el empate.</li>
+            <li style="margin-bottom: 15px;"><i class="fa-solid fa-clock text-primary" style="width: 25px;"></i> <b>Cierre:</b> Solo puedes enviar pronóstico antes de que el partido comience.</li>
           </ul>
         </div>
       </div>
       
-      <!-- Spacing for bottom navbar -->
       <div class="bottom-spacer"></div>
     </section>
-
   </main>
 
-  <!-- Bottom Navigation Bar (Liquid Glass) -->
-  <nav id="bottom-nav" class="bottom-nav glass-nav hide">
+  <!-- Bottom Navigation -->
+  <nav id="bottom-nav" class="bottom-nav hide">
     <button class="nav-item active" data-target="tab-quiniela">
       <i class="fa-solid fa-pen-to-square"></i>
       <span>Quiniela</span>
@@ -126,7 +130,7 @@
     </button>
     <button class="nav-item" data-target="tab-resultados">
       <i class="fa-solid fa-futbol"></i>
-      <span>Resultados</span>
+      <span>Partidos</span>
     </button>
     <button class="nav-item" data-target="tab-reglas">
       <i class="fa-solid fa-book"></i>
@@ -134,10 +138,8 @@
     </button>
   </nav>
 
-  <!-- Toast Notification -->
   <div id="toast" class="toast">Mensaje</div>
 
-  <!-- Scripts -->
   <script src="./app.js"></script>
 </body>
 </html>

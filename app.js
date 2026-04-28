@@ -1,5 +1,3 @@
-// --- CONFIGURACIÓN ---
-// Reemplaza esta URL con la que te da Google Apps Script al hacer "Nueva Implementación"
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwx6tFz-U96YO6HVlVh5rTAH23IffaX_uPp5_5UJHsevCgHTXfmVSr5za7JXWGBekf_ZA/exec';
 
 // --- ESTADO GLOBAL ---
@@ -7,6 +5,25 @@ let currentUser = null;
 let currentPoints = 0;
 let matchesData = [];
 let userPredictions = [];
+
+// --- THEME TOGGLE (Light/Dark Material 3) ---
+const themeBtn = document.getElementById('theme-btn');
+const body = document.body;
+const savedTheme = localStorage.getItem('theme') || 'light';
+body.setAttribute('data-theme', savedTheme);
+updateThemeIcon(savedTheme);
+
+themeBtn.addEventListener('click', () => {
+  const currentTheme = body.getAttribute('data-theme');
+  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+  body.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  updateThemeIcon(newTheme);
+});
+
+function updateThemeIcon(theme) {
+  themeBtn.innerHTML = theme === 'light' ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
+}
 
 // --- PWA SETUP ---
 if ('serviceWorker' in navigator) {
@@ -19,34 +36,53 @@ if ('serviceWorker' in navigator) {
 
 let deferredPrompt;
 const installBtn = document.getElementById('install-btn');
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
+if (!isMobile) {
+  installBtn.innerHTML = '<i class="fa-solid fa-qrcode"></i> Instalar en teléfono';
   installBtn.classList.remove('hide');
-});
+  installBtn.addEventListener('click', () => {
+    document.getElementById('qr-modal').classList.remove('hide');
+  });
+  document.getElementById('close-qr').addEventListener('click', () => {
+    document.getElementById('qr-modal').classList.add('hide');
+  });
+} else {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.classList.remove('hide');
+  });
 
-installBtn.addEventListener('click', async () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      installBtn.classList.add('hide');
+  installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        installBtn.classList.add('hide');
+      }
+      deferredPrompt = null;
     }
-    deferredPrompt = null;
-  }
-});
+  });
+}
 
 // --- UTILIDADES ---
 function showToast(message, type = 'success') {
   const toast = document.getElementById('toast');
   toast.textContent = message;
-  toast.style.background = type === 'error' ? 'var(--danger)' : 'var(--primary-color)';
+  toast.style.background = type === 'error' ? 'var(--danger)' : (type === 'warning' ? 'var(--warning)' : 'var(--success)');
+  toast.style.color = type === 'warning' ? '#000' : '#fff';
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// Simple SHA-256 Hashing (Frontend Basic Security)
+function formatDate(isoString) {
+  if (!isoString) return 'Fecha por definir';
+  const d = new Date(isoString);
+  return d.toLocaleString('es-ES', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' hrs';
+}
+
+// Simple SHA-256 Hashing
 async function hashPassword(message) {
   const msgUint8 = new TextEncoder().encode(message);
   const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
@@ -54,7 +90,7 @@ async function hashPassword(message) {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// --- NAVEGACIÓN (Liquid Glass Tabs) ---
+// --- NAVEGACIÓN ---
 const navItems = document.querySelectorAll('.nav-item');
 const tabs = document.querySelectorAll('.tab-content');
 
@@ -70,6 +106,39 @@ navItems.forEach(item => {
     if (target === 'tab-podio') loadPodio();
     if (target === 'tab-resultados') renderResultados();
   });
+});
+
+// --- AUTO LOGIN & LOGOUT ---
+const savedUser = localStorage.getItem('quiniela_user');
+const savedHash = localStorage.getItem('quiniela_hash');
+if (savedUser && savedHash) {
+  document.getElementById('auth-msg').textContent = 'Iniciando sesión automáticamente...';
+  autoLogin(savedUser, savedHash);
+}
+
+async function autoLogin(username, hash) {
+  try {
+    const queryParams = new URLSearchParams({ action: 'login', username: username, passwordHash: hash }).toString();
+    const res = await fetch(`${SCRIPT_URL}?${queryParams}`);
+    const data = await res.json();
+    if (data.success) {
+      currentUser = data.username;
+      currentPoints = data.puntos;
+      initApp();
+    } else {
+      document.getElementById('auth-msg').textContent = 'Sesión expirada. Inicia de nuevo.';
+      localStorage.removeItem('quiniela_user');
+      localStorage.removeItem('quiniela_hash');
+    }
+  } catch (e) {
+    document.getElementById('auth-msg').textContent = 'Error de conexión automático.';
+  }
+}
+
+document.getElementById('btn-logout').addEventListener('click', () => {
+  localStorage.removeItem('quiniela_user');
+  localStorage.removeItem('quiniela_hash');
+  location.reload();
 });
 
 // --- AUTHENTICATION ---
@@ -90,7 +159,7 @@ async function handleAuth(e, action) {
     return;
   }
   
-  authMsg.textContent = 'Procesando...';
+  authMsg.textContent = 'Conectando con Google Sheets...';
   authMsg.className = 'message';
   
   const passwordHash = await hashPassword(passwordInput);
@@ -98,24 +167,26 @@ async function handleAuth(e, action) {
   try {
     const queryParams = new URLSearchParams({ action, username: usernameInput, passwordHash }).toString();
     const res = await fetch(`${SCRIPT_URL}?${queryParams}`);
-    
     const data = await res.json();
     
     if (data.success) {
       if (action === 'login') {
         currentUser = data.username;
         currentPoints = data.puntos;
+        localStorage.setItem('quiniela_user', currentUser);
+        localStorage.setItem('quiniela_hash', passwordHash);
         initApp();
       } else {
-        showToast('Registro exitoso. Ahora inicia sesión.');
-        authMsg.textContent = '';
+        showToast('¡Cuenta creada exitosamente!', 'success');
+        authMsg.textContent = '¡Listo! Tu cuenta fue creada. Ahora haz clic en el botón azul "Entrar" para acceder a tu Quiniela.';
+        authMsg.style.color = 'var(--success)';
       }
     } else {
       authMsg.textContent = data.message;
       authMsg.className = 'message error';
     }
   } catch (error) {
-    authMsg.textContent = 'Error de conexión. Intenta de nuevo.';
+    authMsg.textContent = 'Error de conexión. Revisa tu internet.';
     authMsg.className = 'message error';
   }
 }
@@ -134,33 +205,17 @@ async function initApp() {
 
 async function loadMatchesData() {
   try {
-    // 1. Obtener Partidos y Resultados
     const resPartidos = await fetch(`${SCRIPT_URL}?action=getPartidos`);
     const dataPartidos = await resPartidos.json();
+    if (dataPartidos.success) matchesData = dataPartidos.matches;
     
-    if (dataPartidos.success) {
-      matchesData = dataPartidos.matches;
-      // Mock data in case sheet is empty for visual demo
-      if (matchesData.length === 0) {
-         matchesData = [
-           { partidoId: '1', equipoLocal: 'México', equipoVisitante: 'Polonia', status: 'SCHEDULED', golesLocal: '', golesVisitante: '' },
-           { partidoId: '2', equipoLocal: 'Argentina', equipoVisitante: 'Arabia', status: 'FINISHED', golesLocal: 1, golesVisitante: 2 }
-         ];
-      }
-    }
-    
-    // 2. Obtener Mis Pronósticos
     const resPronos = await fetch(`${SCRIPT_URL}?action=getMisPronosticos&username=${currentUser}`);
     const dataPronos = await resPronos.json();
-    
-    if (dataPronos.success) {
-      userPredictions = dataPronos.pronosticos;
-    }
+    if (dataPronos.success) userPredictions = dataPronos.pronosticos;
     
     renderQuiniela();
-    
   } catch (error) {
-    showToast('Error cargando datos', 'error');
+    showToast('Error cargando datos reales', 'error');
   }
 }
 
@@ -171,37 +226,45 @@ function renderQuiniela() {
   const upcomingMatches = matchesData.filter(m => m.status === 'SCHEDULED' || m.status === 'TIMED');
   
   if (upcomingMatches.length === 0) {
-    container.innerHTML = '<div class="glass-panel" style="padding:20px; text-align:center;">No hay partidos disponibles para pronosticar.</div>';
+    container.innerHTML = '<div class="m-card" style="text-align:center; color:var(--text-muted);">No hay partidos próximos.</div>';
     return;
   }
   
+  // Ordenar por fecha
+  upcomingMatches.sort((a, b) => new Date(a.date) - new Date(b.date));
+  
+  const now = new Date();
+
   upcomingMatches.forEach(match => {
-    // Buscar si ya hay pronóstico
     const prono = userPredictions.find(p => p.partidoId == match.partidoId);
     const pLocal = prono ? prono.golesLocal : '';
     const pVisit = prono ? prono.golesVisitante : '';
     
+    const matchDate = match.date ? new Date(match.date) : null;
+    // Si la fecha actual es mayor a la del partido, se bloquea la edición
+    const isLocked = matchDate && now >= matchDate;
+    
     const card = document.createElement('div');
-    card.className = 'match-card';
+    card.className = 'm-card match-card';
     card.innerHTML = `
       <div class="match-header">
-        <span>Próximo</span>
+        <span class="match-date"><i class="fa-regular fa-calendar"></i> ${formatDate(match.date)}</span>
         <span class="match-status"><i class="fa-regular fa-clock"></i> Pendiente</span>
       </div>
       <div class="teams-container">
         <div class="team">
           <span class="team-name">${match.equipoLocal}</span>
-          <input type="number" id="hl-${match.partidoId}" class="score-input" min="0" max="15" value="${pLocal}">
+          <input type="number" id="hl-${match.partidoId}" class="score-input" min="0" max="15" value="${pLocal}" ${isLocked ? 'disabled' : ''}>
         </div>
         <div class="vs">VS</div>
         <div class="team">
           <span class="team-name">${match.equipoVisitante}</span>
-          <input type="number" id="al-${match.partidoId}" class="score-input" min="0" max="15" value="${pVisit}">
+          <input type="number" id="al-${match.partidoId}" class="score-input" min="0" max="15" value="${pVisit}" ${isLocked ? 'disabled' : ''}>
         </div>
       </div>
       <div class="match-action">
-        <button class="btn-save-prono ${prono ? 'saved' : ''}" onclick="savePrediction('${match.partidoId}')">
-          ${prono ? '<i class="fa-solid fa-check"></i> Actualizar' : 'Guardar'}
+        <button class="btn-save-prono ${prono ? 'saved' : ''}" onclick="savePrediction('${match.partidoId}')" ${isLocked ? 'disabled' : ''}>
+          ${isLocked ? '<i class="fa-solid fa-lock"></i> Tiempo Agotado' : (prono ? '<i class="fa-solid fa-check"></i> Actualizar' : 'Guardar Pronóstico')}
         </button>
       </div>
     `;
@@ -214,13 +277,15 @@ window.savePrediction = async function(partidoId) {
   const aInput = document.getElementById(`al-${partidoId}`).value;
   
   if (hInput === '' || aInput === '') {
-    showToast('Ingresa ambos resultados', 'error');
+    showToast('Ingresa ambos resultados', 'warning');
     return;
   }
   
   const btn = event.currentTarget;
   const originalHtml = btn.innerHTML;
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+  
+
   
   try {
     const queryParams = new URLSearchParams({
@@ -230,11 +295,12 @@ window.savePrediction = async function(partidoId) {
       golesLocal: hInput,
       golesVisitante: aInput
     }).toString();
+    
     const res = await fetch(`${SCRIPT_URL}?${queryParams}`);
     const data = await res.json();
     
     if (data.success) {
-      showToast('Pronóstico guardado');
+      showToast('Pronóstico guardado exitosamente');
       btn.innerHTML = '<i class="fa-solid fa-check"></i> Actualizado';
       btn.classList.add('saved');
     } else {
@@ -249,7 +315,9 @@ window.savePrediction = async function(partidoId) {
 
 async function loadPodio() {
   const container = document.getElementById('podio-list');
-  container.innerHTML = '<div class="loader"><i class="fa-solid fa-spinner fa-spin"></i> Cargando podio...</div>';
+
+  
+  container.innerHTML = '<div style="text-align:center; padding: 30px;"><i class="fa-solid fa-spinner fa-spin fa-2x text-muted"></i></div>';
   
   try {
     const res = await fetch(`${SCRIPT_URL}?action=getPodio`);
@@ -257,9 +325,8 @@ async function loadPodio() {
     
     if (data.success) {
       container.innerHTML = '';
-      
       if (data.podio.length === 0) {
-        container.innerHTML = '<div style="padding:15px; text-align:center;">Aún no hay puntos.</div>';
+        container.innerHTML = '<div style="padding:20px; text-align:center;">Aún no hay puntos.</div>';
         return;
       }
       
@@ -281,6 +348,8 @@ async function loadPodio() {
   }
 }
 
+
+
 function renderResultados() {
   const container = document.getElementById('resultados-list');
   container.innerHTML = '';
@@ -288,7 +357,7 @@ function renderResultados() {
   const pastMatches = matchesData.filter(m => m.status === 'FINISHED' || m.status === 'IN_PLAY');
   
   if (pastMatches.length === 0) {
-    container.innerHTML = '<div class="glass-panel" style="padding:20px; text-align:center;">No hay resultados aún.</div>';
+    container.innerHTML = '<div class="m-card" style="text-align:center; color:var(--text-muted);">No hay resultados aún.</div>';
     return;
   }
   
@@ -297,14 +366,40 @@ function renderResultados() {
     const statusClass = match.status === 'IN_PLAY' ? 'live' : 'finished';
     const sIcon = match.status === 'IN_PLAY' ? '<i class="fa-solid fa-circle-dot"></i>' : '<i class="fa-solid fa-check-double"></i>';
     
+    // Calcular feedback del pronóstico del usuario
+    let feedbackHtml = '';
+    const prono = userPredictions.find(p => p.partidoId == match.partidoId);
+    
+    if (prono && match.status === 'FINISHED') {
+      let pts = 0;
+      const rh = parseInt(match.golesLocal), ra = parseInt(match.golesVisitante);
+      const ph = parseInt(prono.golesLocal), pa = parseInt(prono.golesVisitante);
+      
+      let rGanador = rh > ra ? 1 : (rh < ra ? -1 : 0);
+      let pGanador = ph > pa ? 1 : (ph < pa ? -1 : 0);
+      
+      if (ph === rh && pa === ra) pts = 2;
+      else if (rGanador === pGanador) pts = 1;
+      
+      let msg = pts === 2 ? '¡Marcador Exacto! +2 Pts' : (pts === 1 ? '¡Acertaste al ganador! +1 Pt' : 'No acertaste. 0 Pts');
+      feedbackHtml = `
+        <div class="feedback-box pts-${pts}">
+          Tu pronóstico: ${prono.golesLocal} - ${prono.golesVisitante} <br>
+          <small>${msg}</small>
+        </div>
+      `;
+    } else if (!prono && match.status === 'FINISHED') {
+      feedbackHtml = `<div class="feedback-box pts-0">No enviaste pronóstico. 0 Pts</div>`;
+    }
+
     const card = document.createElement('div');
-    card.className = 'match-card';
+    card.className = 'm-card match-card';
     card.innerHTML = `
       <div class="match-header">
-        <span>Marcador Oficial</span>
+        <span class="match-date">${formatDate(match.date)}</span>
         <span class="match-status ${statusClass}">${sIcon} ${statusText}</span>
       </div>
-      <div class="teams-container" style="margin-top: 10px;">
+      <div class="teams-container" style="margin-top: 15px;">
         <div class="team">
           <span class="team-name">${match.equipoLocal}</span>
           <span class="real-score">${match.golesLocal !== '' ? match.golesLocal : '-'}</span>
@@ -315,6 +410,7 @@ function renderResultados() {
           <span class="real-score">${match.golesVisitante !== '' ? match.golesVisitante : '-'}</span>
         </div>
       </div>
+      ${feedbackHtml}
     `;
     container.appendChild(card);
   });
