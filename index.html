@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Quiniela Mundial 2026</title>
+  <meta property="og:image" content="https://imgur.com/QZUSxp5.png">
+  <meta property="og:title" content="Quiniela Notaría 134">
+  <meta property="og:description" content="Únete a la quiniela oficial de la Notaría y demuestra quién sabe más de fútbol.">
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#1a73e8">
   <link rel="stylesheet" href="./styles.css">
@@ -32,12 +35,17 @@
       </div>
       <form id="auth-form" class="m-card" style="margin-top: 30px;">
         <div class="input-group">
-          <i class="fa-solid fa-user"></i>
-          <input type="text" id="username" placeholder="Usuario" required autocomplete="off">
+          <i class="fa-solid fa-envelope"></i>
+          <input type="email" id="email" placeholder="Correo (@notaria134.com.mx)" required autocomplete="off">
         </div>
-        <div class="input-group">
+        <div class="input-group" style="position:relative;">
           <i class="fa-solid fa-lock"></i>
           <input type="password" id="password" placeholder="Contraseña" required>
+          <button type="button" id="toggle-password" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-eye"></i></button>
+        </div>
+        <div class="input-group">
+          <i class="fa-solid fa-user"></i>
+          <input type="text" id="username" placeholder="Usuario (Solo si creas cuenta)" autocomplete="off">
         </div>
         <p style="font-size: 0.8rem; color: var(--danger); text-align: left; margin-bottom: 20px; font-weight: 500;">
           <i class="fa-solid fa-triangle-exclamation"></i> Importante: Anota tu contraseña en un lugar seguro. No se puede recuperar si la olvidas.
@@ -58,6 +66,12 @@
         <p style="font-size: 0.95rem; margin-bottom: 20px; color:var(--text-muted);">Escanea este código QR con la cámara de tu teléfono para instalar la app fácilmente.</p>
         <img src="https://imgur.com/eNRDXNG.png" alt="QR Code" style="width: 100%; max-width: 220px; border-radius: var(--radius-md); border: 2px solid var(--border);">
       </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="modal hide" style="flex-direction:column; color:white; font-size:1.2rem; text-align:center;">
+      <i class="fa-solid fa-server fa-bounce fa-3x" style="margin-bottom: 20px; color: var(--primary);"></i>
+      <p>Conectando con los servidores de la Notaría...</p>
     </div>
 
     <!-- Main Content View -->

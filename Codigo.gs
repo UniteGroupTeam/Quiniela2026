@@ -6,18 +6,18 @@ function doGet(e) {
   if (action === 'register') {
     const sheetUsuarios = SpreadsheetApp.getActive().getSheetByName('Usuarios');
     const users = sheetUsuarios.getDataRange().getValues();
-    if (users.some((row, i) => i > 0 && row[0] === e.parameter.username)) {
-      return jsonResponse({ success: false, message: 'El usuario ya existe' });
+    if (users.some((row, i) => i > 0 && (row[0] === e.parameter.email || row[1] === e.parameter.username))) {
+      return jsonResponse({ success: false, message: 'El correo o usuario ya existe' });
     }
-    sheetUsuarios.appendRow([e.parameter.username, e.parameter.passwordHash, 0]);
+    sheetUsuarios.appendRow([e.parameter.email, e.parameter.username, e.parameter.password, 0]);
     return jsonResponse({ success: true, message: 'Registrado con éxito' });
   }
   
   if (action === 'login') {
     const sheetUsuarios = SpreadsheetApp.getActive().getSheetByName('Usuarios');
     const users = sheetUsuarios.getDataRange().getValues();
-    const user = users.find((row, i) => i > 0 && row[0] === e.parameter.username && row[1] === e.parameter.passwordHash);
-    if (user) return jsonResponse({ success: true, username: user[0], puntos: user[2] });
+    const user = users.find((row, i) => i > 0 && row[0] === e.parameter.email && row[2] === e.parameter.password);
+    if (user) return jsonResponse({ success: true, username: user[1], puntos: user[3] || 0 });
     return jsonResponse({ success: false, message: 'Credenciales inválidas' });
   }
   
@@ -147,7 +147,7 @@ function calcularYOtorgarPuntos(partidoId, resHome, resAway) {
   const pronosData = SpreadsheetApp.getActive().getSheetByName('Pronosticos').getDataRange().getValues();
   const usersData = sheetUsuarios.getDataRange().getValues();
   let userRowMap = {};
-  for (let i = 1; i < usersData.length; i++) userRowMap[usersData[i][0]] = i + 1;
+  for (let i = 1; i < usersData.length; i++) userRowMap[usersData[i][1]] = i + 1;
   let ganadorReal = resHome > resAway ? 1 : (resHome < resAway ? -1 : 0);
   
   pronosData.slice(1).forEach(row => {
@@ -160,7 +160,7 @@ function calcularYOtorgarPuntos(partidoId, resHome, resAway) {
       }
       if (pts > 0 && userRowMap[row[0]]) {
         let rIdx = userRowMap[row[0]];
-        sheetUsuarios.getRange(rIdx, 3).setValue((sheetUsuarios.getRange(rIdx, 3).getValue() || 0) + pts);
+        sheetUsuarios.getRange(rIdx, 4).setValue((sheetUsuarios.getRange(rIdx, 4).getValue() || 0) + pts);
       }
     }
   });

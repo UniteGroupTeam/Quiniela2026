@@ -82,12 +82,15 @@ function formatDate(isoString) {
   return d.toLocaleString('es-ES', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' hrs';
 }
 
-// Simple SHA-256 Hashing
-async function hashPassword(message) {
-  const msgUint8 = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+// --- PASSWORD TOGGLE ---
+const togglePassword = document.getElementById('toggle-password');
+const passwordInput = document.getElementById('password');
+if (togglePassword && passwordInput) {
+  togglePassword.addEventListener('click', () => {
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    togglePassword.innerHTML = type === 'password' ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
+  });
 }
 
 // --- NAVEGACIÓN ---
@@ -109,35 +112,37 @@ navItems.forEach(item => {
 });
 
 // --- AUTO LOGIN & LOGOUT ---
-const savedUser = localStorage.getItem('quiniela_user');
-const savedHash = localStorage.getItem('quiniela_hash');
-if (savedUser && savedHash) {
-  document.getElementById('auth-msg').textContent = 'Iniciando sesión automáticamente...';
-  autoLogin(savedUser, savedHash);
+const savedEmail = localStorage.getItem('quiniela_email');
+const savedPass = localStorage.getItem('quiniela_pass');
+if (savedEmail && savedPass) {
+  document.getElementById('loading-overlay').classList.remove('hide');
+  autoLogin(savedEmail, savedPass);
 }
 
-async function autoLogin(username, hash) {
+async function autoLogin(email, pass) {
   try {
-    const queryParams = new URLSearchParams({ action: 'login', username: username, passwordHash: hash }).toString();
+    const queryParams = new URLSearchParams({ action: 'login', email: email, password: pass }).toString();
     const res = await fetch(`${SCRIPT_URL}?${queryParams}`);
     const data = await res.json();
+    document.getElementById('loading-overlay').classList.add('hide');
     if (data.success) {
       currentUser = data.username;
       currentPoints = data.puntos;
       initApp();
     } else {
-      document.getElementById('auth-msg').textContent = 'Sesión expirada. Inicia de nuevo.';
-      localStorage.removeItem('quiniela_user');
-      localStorage.removeItem('quiniela_hash');
+      showToast('Sesión expirada. Inicia de nuevo.', 'error');
+      localStorage.removeItem('quiniela_email');
+      localStorage.removeItem('quiniela_pass');
     }
   } catch (e) {
-    document.getElementById('auth-msg').textContent = 'Error de conexión automático.';
+    document.getElementById('loading-overlay').classList.add('hide');
+    showToast('Error de conexión automático.', 'error');
   }
 }
 
 document.getElementById('btn-logout').addEventListener('click', () => {
-  localStorage.removeItem('quiniela_user');
-  localStorage.removeItem('quiniela_hash');
+  localStorage.removeItem('quiniela_email');
+  localStorage.removeItem('quiniela_pass');
   location.reload();
 });
 
@@ -150,44 +155,53 @@ document.getElementById('btn-register').addEventListener('click', (e) => handleA
 
 async function handleAuth(e, action) {
   e.preventDefault();
-  const usernameInput = document.getElementById('username').value.trim();
-  const passwordInput = document.getElementById('password').value;
+  const emailInput = document.getElementById('email').value.trim();
+  const usernameInput = document.getElementById('username') ? document.getElementById('username').value.trim() : '';
+  const passwordInputValue = document.getElementById('password').value;
   
-  if (!usernameInput || !passwordInput) {
-    authMsg.textContent = 'Llena ambos campos';
-    authMsg.className = 'message error';
+  if (!emailInput || !passwordInputValue) {
+    showToast('Llena correo y contraseña', 'warning');
     return;
   }
   
-  authMsg.textContent = 'Conectando con Google Sheets...';
-  authMsg.className = 'message';
+  if (action === 'register') {
+    if (!usernameInput) {
+      showToast('Debes poner un nombre de usuario', 'warning');
+      return;
+    }
+    if (!emailInput.endsWith('@notaria134.com.mx')) {
+      showToast('Solo correos @notaria134.com.mx permitidos', 'error');
+      return;
+    }
+  }
   
-  const passwordHash = await hashPassword(passwordInput);
+  document.getElementById('loading-overlay').classList.remove('hide');
   
   try {
-    const queryParams = new URLSearchParams({ action, username: usernameInput, passwordHash }).toString();
+    const queryParams = new URLSearchParams({ action, email: emailInput, username: usernameInput, password: passwordInputValue }).toString();
     const res = await fetch(`${SCRIPT_URL}?${queryParams}`);
     const data = await res.json();
+    
+    document.getElementById('loading-overlay').classList.add('hide');
     
     if (data.success) {
       if (action === 'login') {
         currentUser = data.username;
         currentPoints = data.puntos;
-        localStorage.setItem('quiniela_user', currentUser);
-        localStorage.setItem('quiniela_hash', passwordHash);
+        localStorage.setItem('quiniela_email', emailInput);
+        localStorage.setItem('quiniela_pass', passwordInputValue);
         initApp();
       } else {
         showToast('¡Cuenta creada exitosamente!', 'success');
-        authMsg.textContent = '¡Listo! Tu cuenta fue creada. Ahora haz clic en el botón azul "Entrar" para acceder a tu Quiniela.';
+        authMsg.textContent = '¡Listo! Tu cuenta fue creada. Haz clic en "Entrar".';
         authMsg.style.color = 'var(--success)';
       }
     } else {
-      authMsg.textContent = data.message;
-      authMsg.className = 'message error';
+      showToast(data.message, 'error');
     }
   } catch (error) {
-    authMsg.textContent = 'Error de conexión. Revisa tu internet.';
-    authMsg.className = 'message error';
+    document.getElementById('loading-overlay').classList.add('hide');
+    showToast('Error de conexión. Revisa tu internet.', 'error');
   }
 }
 
