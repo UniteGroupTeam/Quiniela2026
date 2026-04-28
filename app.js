@@ -86,10 +86,11 @@ function formatDate(isoString) {
 const togglePassword = document.getElementById('toggle-password');
 const passwordInput = document.getElementById('password');
 if (togglePassword && passwordInput) {
-  togglePassword.addEventListener('click', () => {
-    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-    passwordInput.setAttribute('type', type);
-    togglePassword.innerHTML = type === 'password' ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
+  togglePassword.addEventListener('click', (e) => {
+    e.preventDefault();
+    const isPassword = passwordInput.getAttribute('type') === 'password';
+    passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+    togglePassword.innerHTML = isPassword ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
   });
 }
 
