@@ -399,23 +399,24 @@ h1, h2, h3 { font-weight: 600; }
 .rank-item.top-3 .rank-pos { color: #b45309; }
 
 /* Bottom Nav */
-.bottom-spacer { height: 90px; }
+.bottom-spacer { height: 100px; }
 .bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: var(--nav-height);
+  height: calc(var(--nav-height) + env(safe-area-inset-bottom));
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid var(--border);
   display: flex;
   justify-content: space-around;
-  align-items: center;
+  align-items: flex-start; /* Alineamos al inicio para que el padding bottom no desplace el contenido */
   z-index: 1000;
   padding-bottom: env(safe-area-inset-bottom);
 }
+
 .nav-item {
   background: none;
   border: none;
@@ -423,35 +424,49 @@ h1, h2, h3 { font-weight: 600; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* Centrado vertical */
+  justify-content: center;
   gap: 4px;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   flex: 1;
-  height: 100%; /* Ocupa toda la altura de la barra */
+  height: var(--nav-height); /* Altura fija para el contenido táctil */
   min-width: 0;
-  transition: background-color 0.2s;
-  border-radius: 0; /* Quitamos radio para que el área sea cuadrada y grande */
+  transition: all 0.2s;
+  border-radius: 12px;
+  margin: 4px;
+  position: relative;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .nav-item:active {
-  background-color: rgba(0, 0, 0, 0.05); /* Feedback visual al tocar */
+  background-color: rgba(0, 0, 0, 0.08);
+  transform: scale(0.95);
 }
 
 [data-theme="dark"] .nav-item:active {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .nav-item i {
-  font-size: 1.2rem;
-  padding: 4px 16px;
+  font-size: 1.3rem;
+  padding: 6px 20px;
   border-radius: 20px;
-  transition: all 0.2s;
-  pointer-events: none; /* El clic pasa directamente al botón */
+  transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+  pointer-events: none;
 }
-.nav-item.active { color: var(--primary); }
-.nav-item.active i { background: var(--primary); color: var(--on-primary); }
+
+.nav-item.active { 
+  color: var(--primary); 
+}
+
+.nav-item.active i { 
+  background: var(--primary); 
+  color: var(--on-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 
 /* Toast */
 .toast {

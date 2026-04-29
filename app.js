@@ -114,27 +114,44 @@ if (togglePassword && passwordInput) {
 const navItems = document.querySelectorAll('.nav-item');
 const tabs = document.querySelectorAll('.tab-content');
 
+function handleNavigation(item) {
+  const target = item.getAttribute('data-target');
+  if (!target) return;
+
+  // 1. Feedback Visual Inmediato
+  navItems.forEach(nav => nav.classList.remove('active'));
+  item.classList.add('active');
+
+  // 2. Cambiar Contenido
+  tabs.forEach(tab => tab.classList.add('hide'));
+  const targetTab = document.getElementById(target);
+  if (targetTab) {
+    targetTab.classList.remove('hide');
+    // Scroll al inicio de la pestaña suavemente
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // 3. Cargar datos específicos (sin bloquear UI)
+  if (target === 'tab-podio') loadPodio();
+  if (target === 'tab-resultados') renderResultados();
+  if (target === 'tab-quiniela') renderQuiniela();
+}
+
 navItems.forEach(item => {
+  // Soporte para Click
   item.addEventListener('click', (e) => {
-    const target = item.getAttribute('data-target');
-    if (!target) return;
-
-    // 1. Feedback Visual Inmediato (Igual para todos)
-    navItems.forEach(nav => nav.classList.remove('active'));
-    item.classList.add('active');
-
-    // 2. Cambiar Contenido
-    tabs.forEach(tab => tab.classList.add('hide'));
-    const targetTab = document.getElementById(target);
-    if (targetTab) targetTab.classList.remove('hide');
-
-    // 3. Cargar datos específicos
-    if (target === 'tab-podio') loadPodio();
-    if (target === 'tab-resultados') renderResultados();
-    
-    // Scroll al inicio de la pestaña
-    window.scrollTo(0, 0);
+    handleNavigation(item);
   });
+  
+  // Soporte para Touch (más rápido en móviles)
+  item.addEventListener('touchstart', (e) => {
+    // Evitamos doble disparo si el navegador emite click después
+    // Pero solo si tiene target (el botón de instalar necesita su propio flujo)
+    if (item.getAttribute('data-target')) {
+      // e.preventDefault(); // Comentado para no romper scroll nativo si fuera necesario, pero handleNavigation es seguro
+      handleNavigation(item);
+    }
+  }, { passive: true });
 });
 
 // --- AUTO LOGIN & LOGOUT ---
