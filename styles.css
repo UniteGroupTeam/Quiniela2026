@@ -427,7 +427,8 @@ h1, h2, h3 { font-weight: 600; }
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  width: 25%;
+  flex: 1; /* Cambiado de 25% para permitir 5 elementos */
+  min-width: 0;
 }
 .nav-item i {
   font-size: 1.3rem;
@@ -458,21 +459,49 @@ h1, h2, h3 { font-weight: 600; }
   opacity: 1;
 }
 
-/* Install Btn */
+/* Botón de Instalar: Ajuste para evitar solapamientos en iPhone 14 Pro Max */
 .install-pwa {
-  position: fixed;
-  top: 20px;
+  position: absolute;
+  top: 75px; 
   left: 20px;
-  background: var(--primary);
-  color: var(--on-primary);
-  border: none;
-  padding: 10px 16px;
+  background: var(--surface);
+  color: var(--primary);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
   border-radius: 100px;
-  cursor: pointer;
-  z-index: 100;
-  font-weight: 600;
+  font-size: 0.85rem;
+  z-index: 10;
+  white-space: nowrap;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Tutorial iOS Modal Styles */
+.tutorial-step {
+  margin-bottom: 25px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 15px;
+}
+.tutorial-step:last-of-type { border-bottom: none; }
+.tutorial-step p {
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+.tutorial-step img {
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
   box-shadow: var(--shadow);
 }
+.step-imgs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
 /* ================= BRANDING WATERMARKS ================= */
 .watermark-side {
   position: fixed;
@@ -559,6 +588,21 @@ h1, h2, h3 { font-weight: 600; }
 
 .branding-footer img {
   width: 30px;
+}
+
+/* Marca de agua específica dentro de la App (más sutil) */
+.app-branding {
+  margin-top: 50px;
+  opacity: 0.5;
+  border-top: none; /* Sin línea para que se vea más limpio */
+}
+
+.app-branding a {
+  font-size: 0.75rem;
+}
+
+.app-branding:hover {
+  opacity: 1;
 }
 
 /* Responsividad para Watermarks */

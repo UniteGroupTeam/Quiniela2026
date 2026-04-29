@@ -35,35 +35,51 @@ if ('serviceWorker' in navigator) {
 }
 
 let deferredPrompt;
-const installBtn = document.getElementById('install-btn');
+const installBtn = document.getElementById('install-nav-item');
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-if (!isMobile) {
-  installBtn.innerHTML = '<i class="fa-solid fa-qrcode"></i> Instalar en teléfono';
-  installBtn.classList.remove('hide');
-  installBtn.addEventListener('click', () => {
-    document.getElementById('qr-modal').classList.remove('hide');
-  });
-  document.getElementById('close-qr').addEventListener('click', () => {
-    document.getElementById('qr-modal').classList.add('hide');
-  });
+if (isStandalone) {
+  if (installBtn) installBtn.classList.add('hide');
 } else {
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installBtn.classList.remove('hide');
-  });
-
-  installBtn.addEventListener('click', async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        installBtn.classList.add('hide');
-      }
-      deferredPrompt = null;
+  if (isIOS) {
+    if (installBtn) {
+      installBtn.classList.remove('hide');
+      installBtn.addEventListener('click', () => {
+        document.getElementById('ios-modal').classList.remove('hide');
+      });
     }
-  });
+    document.getElementById('close-ios').addEventListener('click', () => document.getElementById('ios-modal').classList.add('hide'));
+    document.getElementById('got-it-ios').addEventListener('click', () => document.getElementById('ios-modal').classList.add('hide'));
+  } else if (!isMobile) {
+    if (installBtn) {
+      installBtn.classList.remove('hide');
+      installBtn.addEventListener('click', () => {
+        document.getElementById('qr-modal').classList.remove('hide');
+      });
+    }
+    document.getElementById('close-qr').addEventListener('click', () => {
+      document.getElementById('qr-modal').classList.add('hide');
+    });
+  } else {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (installBtn) installBtn.classList.remove('hide');
+    });
+
+    if (installBtn) {
+      installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') installBtn.classList.add('hide');
+          deferredPrompt = null;
+        }
+      });
+    }
+  }
 }
 
 // --- UTILIDADES ---
@@ -100,11 +116,13 @@ const tabs = document.querySelectorAll('.tab-content');
 
 navItems.forEach(item => {
   item.addEventListener('click', () => {
+    const target = item.getAttribute('data-target');
+    if (!target) return; // Si no tiene target (como el botón de instalar), no hacemos nada aquí
+    
     navItems.forEach(nav => nav.classList.remove('active'));
     tabs.forEach(tab => tab.classList.add('hide'));
     
     item.classList.add('active');
-    const target = item.getAttribute('data-target');
     document.getElementById(target).classList.remove('hide');
     
     if (target === 'tab-podio') loadPodio();

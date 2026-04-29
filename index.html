@@ -23,10 +23,6 @@
     <i class="fa-solid fa-moon"></i>
   </button>
 
-  <button id="install-btn" class="install-pwa hide">
-    <i class="fa-solid fa-download"></i> Instalar App
-  </button>
-
   <!-- Watermarks PC (Left) -->
   <aside class="watermark-side left">
     <a href="https://bottle-code-rodricg30-shop.fourthwall.com/en-mxn" target="_blank">
@@ -100,6 +96,34 @@
       </div>
     </div>
 
+    <!-- Modal Tutorial iOS -->
+    <div id="ios-modal" class="modal hide">
+      <div class="modal-content m-card" style="position: relative; max-width: 400px; max-height: 90vh; overflow-y: auto;">
+        <button id="close-ios" style="position:absolute; top:15px; right:15px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-muted); z-index: 10;"><i class="fa-solid fa-xmark"></i></button>
+        <h3 style="text-align:center; color:var(--primary); margin-bottom: 20px;">Instalar en iPhone</h3>
+        
+        <div class="tutorial-step">
+          <p><strong>Paso 1:</strong> Presiona el botón de <strong>Compartir</strong> en Safari.</p>
+          <div class="step-imgs">
+            <img src="https://i.imgur.com/6W66JQn.png" alt="Paso 1a">
+            <img src="https://i.imgur.com/NTzIAlo.png" alt="Paso 1b">
+          </div>
+        </div>
+
+        <div class="tutorial-step">
+          <p><strong>Paso 2:</strong> Desliza el menú hacia arriba.</p>
+          <img src="https://i.imgur.com/YhFDRcH.png" alt="Paso 2">
+        </div>
+
+        <div class="tutorial-step">
+          <p><strong>Paso 3:</strong> Toca en <strong>"Añadir a pantalla de inicio"</strong>.</p>
+          <img src="https://i.imgur.com/BX7Ub6L.png" alt="Paso 3">
+        </div>
+
+        <button class="btn primary-btn" id="got-it-ios" style="margin-top: 20px;">¡Entendido!</button>
+      </div>
+    </div>
+
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="modal hide" style="flex-direction:column; color:white; font-size:1.2rem; text-align:center;">
       <i class="fa-solid fa-server fa-bounce fa-3x" style="margin-bottom: 20px; color: var(--primary);"></i>
@@ -160,6 +184,14 @@
         </div>
       </div>
       
+      <!-- Branding Permanente en la App -->
+      <div class="branding-footer app-branding">
+        <a href="https://bottle-code-rodricg30-shop.fourthwall.com/en-mxn" target="_blank">
+          <img src="https://i.imgur.com/eUp4TNW.png" alt="Logo Bottle Code">
+          <span>Desarrollado por Luis Rodrigo | Bottle Code</span>
+        </a>
+      </div>
+
       <div class="bottom-spacer"></div>
     </section>
   </main>
@@ -177,6 +209,10 @@
     <button class="nav-item" data-target="tab-resultados">
       <i class="fa-solid fa-futbol"></i>
       <span>Partidos</span>
+    </button>
+    <button class="nav-item hide" id="install-nav-item">
+      <i class="fa-solid fa-download"></i>
+      <span>Instalar</span>
     </button>
     <button class="nav-item" data-target="tab-reglas">
       <i class="fa-solid fa-book"></i>
