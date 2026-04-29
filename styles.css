@@ -413,8 +413,9 @@ h1, h2, h3 { font-weight: 600; }
   display: flex;
   justify-content: space-around;
   align-items: flex-start; /* Alineamos al inicio para que el padding bottom no desplace el contenido */
-  z-index: 1000;
+  z-index: 9999; /* Máxima prioridad para asegurar clics */
   padding-bottom: env(safe-area-inset-bottom);
+  pointer-events: auto; /* Aseguramos que capture los eventos */
 }
 
 .nav-item {

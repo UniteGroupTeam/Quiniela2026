@@ -114,9 +114,14 @@ if (togglePassword && passwordInput) {
 const navItems = document.querySelectorAll('.nav-item');
 const tabs = document.querySelectorAll('.tab-content');
 
-function handleNavigation(item) {
+function handleNavigation(e) {
+  // Buscamos el botón más cercano (por si se hizo clic en el icono)
+  const item = e.currentTarget;
   const target = item.getAttribute('data-target');
   if (!target) return;
+
+  e.preventDefault();
+  e.stopPropagation();
 
   // 1. Feedback Visual Inmediato
   navItems.forEach(nav => nav.classList.remove('active'));
@@ -127,31 +132,19 @@ function handleNavigation(item) {
   const targetTab = document.getElementById(target);
   if (targetTab) {
     targetTab.classList.remove('hide');
-    // Scroll al inicio de la pestaña suavemente
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'auto' }); // 'auto' es más fiable que 'smooth' para cambios de pestaña
   }
 
-  // 3. Cargar datos específicos (sin bloquear UI)
+  // 3. Cargar datos específicos
   if (target === 'tab-podio') loadPodio();
-  if (target === 'tab-resultados') renderResultados();
-  if (target === 'tab-quiniela') renderQuiniela();
+  else if (target === 'tab-resultados') renderResultados();
+  else if (target === 'tab-quiniela') renderQuiniela();
 }
 
 navItems.forEach(item => {
-  // Soporte para Click
-  item.addEventListener('click', (e) => {
-    handleNavigation(item);
-  });
-  
-  // Soporte para Touch (más rápido en móviles)
-  item.addEventListener('touchstart', (e) => {
-    // Evitamos doble disparo si el navegador emite click después
-    // Pero solo si tiene target (el botón de instalar necesita su propio flujo)
-    if (item.getAttribute('data-target')) {
-      // e.preventDefault(); // Comentado para no romper scroll nativo si fuera necesario, pero handleNavigation es seguro
-      handleNavigation(item);
-    }
-  }, { passive: true });
+  // Usamos solo un tipo de evento para evitar conflictos
+  // Los navegadores modernos manejan el clic sin delay si el viewport está bien configurado
+  item.addEventListener('click', handleNavigation);
 });
 
 // --- AUTO LOGIN & LOGOUT ---
