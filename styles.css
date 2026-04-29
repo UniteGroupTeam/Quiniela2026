@@ -423,18 +423,32 @@ h1, h2, h3 { font-weight: 600; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
+  justify-content: center; /* Centrado vertical */
+  gap: 4px;
+  font-size: 0.7rem;
   font-weight: 600;
   cursor: pointer;
-  flex: 1; /* Cambiado de 25% para permitir 5 elementos */
+  flex: 1;
+  height: 100%; /* Ocupa toda la altura de la barra */
   min-width: 0;
+  transition: background-color 0.2s;
+  border-radius: 0; /* Quitamos radio para que el área sea cuadrada y grande */
 }
+
+.nav-item:active {
+  background-color: rgba(0, 0, 0, 0.05); /* Feedback visual al tocar */
+}
+
+[data-theme="dark"] .nav-item:active {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
 .nav-item i {
-  font-size: 1.3rem;
-  padding: 6px 16px;
+  font-size: 1.2rem;
+  padding: 4px 16px;
   border-radius: 20px;
   transition: all 0.2s;
+  pointer-events: none; /* El clic pasa directamente al botón */
 }
 .nav-item.active { color: var(--primary); }
 .nav-item.active i { background: var(--primary); color: var(--on-primary); }

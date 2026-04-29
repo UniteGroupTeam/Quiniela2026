@@ -115,18 +115,25 @@ const navItems = document.querySelectorAll('.nav-item');
 const tabs = document.querySelectorAll('.tab-content');
 
 navItems.forEach(item => {
-  item.addEventListener('click', () => {
+  item.addEventListener('click', (e) => {
     const target = item.getAttribute('data-target');
-    if (!target) return; // Si no tiene target (como el botón de instalar), no hacemos nada aquí
-    
+    if (!target) return;
+
+    // 1. Feedback Visual Inmediato (Igual para todos)
     navItems.forEach(nav => nav.classList.remove('active'));
-    tabs.forEach(tab => tab.classList.add('hide'));
-    
     item.classList.add('active');
-    document.getElementById(target).classList.remove('hide');
-    
+
+    // 2. Cambiar Contenido
+    tabs.forEach(tab => tab.classList.add('hide'));
+    const targetTab = document.getElementById(target);
+    if (targetTab) targetTab.classList.remove('hide');
+
+    // 3. Cargar datos específicos
     if (target === 'tab-podio') loadPodio();
     if (target === 'tab-resultados') renderResultados();
+    
+    // Scroll al inicio de la pestaña
+    window.scrollTo(0, 0);
   });
 });
 
