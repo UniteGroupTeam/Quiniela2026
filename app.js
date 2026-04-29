@@ -1,4 +1,4 @@
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyWgla563y1ttwVlAeYqzN25QvbRI4sDwvHZDfBgRY1qUigR0Quk5NAI9JxnG3GnohbBw/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxm3UTSkOMkrxP8UNOeB0uyc6Sh0WA4dRSUr8ifE9GyF_jUd9tirJ9rkgP_abJy2vyoMw/exec';
 
 // --- ESTADO GLOBAL ---
 let currentUser = null;
