@@ -473,3 +473,99 @@ h1, h2, h3 { font-weight: 600; }
   font-weight: 600;
   box-shadow: var(--shadow);
 }
+/* ================= BRANDING WATERMARKS ================= */
+.watermark-side {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  display: none; /* Oculto por defecto en móvil */
+  text-align: center;
+  pointer-events: auto;
+}
+
+.watermark-side.left { left: 40px; }
+.watermark-side.right { right: 40px; }
+
+.watermark-side a {
+  text-decoration: none;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transition: opacity 0.3s;
+}
+
+.watermark-side a:hover { opacity: 0.7; }
+
+.watermark-side img {
+  width: 120px;
+  filter: grayscale(1) opacity(0.3);
+  transition: all 0.3s;
+}
+
+.watermark-side a:hover img { filter: grayscale(0) opacity(1); }
+
+.watermark-side p {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
+  opacity: 0.4;
+}
+
+.watermark-side p span { font-weight: 800; color: var(--primary); }
+
+/* Social Icons Sidebar */
+.social-links {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.social-links a {
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  opacity: 0.3;
+  transition: all 0.3s;
+}
+
+.social-links a:hover {
+  opacity: 1;
+  color: var(--primary);
+  transform: scale(1.2);
+}
+
+/* Branding Footer (Mobile) */
+.branding-footer {
+  margin-top: 30px;
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+  text-align: center;
+}
+
+.branding-footer a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.6;
+}
+
+.branding-footer img {
+  width: 30px;
+}
+
+/* Responsividad para Watermarks */
+@media (min-width: 1100px) {
+  .watermark-side { display: block; }
+}
+
+@media (max-width: 600px) {
+  .branding-footer { margin-bottom: 20px; }
+}
