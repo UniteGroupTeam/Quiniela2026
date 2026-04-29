@@ -330,8 +330,30 @@ window.savePrediction = async function(partidoId) {
 
 async function loadPodio() {
   const container = document.getElementById('podio-list');
-
+  const userEmail = localStorage.getItem('quiniela_email'); // Obtenemos el correo guardado
   
+  // VERIFICACIÓN: ¿Es el Jefe (Miguel)?
+  const isAdmin = (userEmail === 'sistemas@notaria134.com.mx');
+
+  if (!isAdmin) {
+    // Si NO es el jefe, mostramos el QR y el mensaje del blog
+    container.innerHTML = `
+      <div style="text-align:center; padding: 20px;">
+        <p style="margin-bottom: 20px; font-weight: 600; color: var(--text-main);">
+          Aquí pueden ver sus resultados oficiales iniciando sesión con su usuario del blog oficial de la notaría.
+        </p>
+        <a href="https://notaria134cdmx.buk.mx/" target="_blank" style="text-decoration:none;">
+          <img src="https://i.imgur.com/BhUqkNB.png" alt="QR Blog" style="width: 100%; max-width: 250px; border-radius: var(--radius-md); box-shadow: var(--shadow); border: 2px solid var(--primary);">
+          <p style="margin-top: 15px; color: var(--primary); font-weight: 800;">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> IR AL BLOG OFICIAL
+          </p>
+        </a>
+      </div>
+    `;
+    return;
+  }
+
+  // Si ES el jefe, cargamos los datos reales del servidor
   container.innerHTML = '<div style="text-align:center; padding: 30px;"><i class="fa-solid fa-spinner fa-spin fa-2x text-muted"></i></div>';
   
   try {
@@ -345,7 +367,10 @@ async function loadPodio() {
         return;
       }
       
-      data.podio.forEach((user, index) => {
+      // Solo mostramos los primeros 10 lugares para el jefe
+      const top10 = data.podio.slice(0, 10);
+      
+      top10.forEach((user, index) => {
         const topClass = index === 0 ? 'top-1' : index === 1 ? 'top-2' : index === 2 ? 'top-3' : '';
         const icon = index === 0 ? '<i class="fa-solid fa-crown"></i>' : (index + 1);
         
@@ -357,6 +382,12 @@ async function loadPodio() {
           </div>
         `;
       });
+      
+      container.innerHTML += `
+        <div style="text-align:center; padding: 15px; font-size: 0.8rem; color: var(--text-muted);">
+          <i class="fa-solid fa-lock"></i> Vista exclusiva de Administrador (Top 10)
+        </div>
+      `;
     }
   } catch (error) {
     container.innerHTML = '<div style="padding:15px; text-align:center; color:var(--danger);">Error cargando podio.</div>';
